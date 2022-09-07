@@ -1,0 +1,79 @@
+<html>
+
+  <body>
+
+    <h1>Add Grocery</h1>
+    <form method="post" action="/add">
+<dl>
+<p>
+<input name="inputName" value="" type="text"
+            placeholder="name" autocomplete="off" required>
+</p>
+<p>
+<input name="inputPrice" value="" type="text"
+            placeholder="price" autocomplete="off" required>
+</p>
+</dl>
+<p>
+<input type="submit" value="Submit">
+</p>
+
+</form>
+
+    <h1>Groceries</h1>
+    <table>
+      <tr>
+        <td><h3>item_name </h3></td>
+        <td><h3>item_price </h3></td>
+      </tr>
+      {% for it in item.items %}
+        <tr>
+
+          <td>
+            {{it.name}}
+          </td>
+          <td>
+            {{it.price}}
+          </td>
+          <td>
+            <form method="POST" action="./update" style="display: inline">
+              <input type="hidden" value="{{it.name}}" name="oldname">
+              <input type="text" value="{{it.name}}" name="newname">
+              <input type="text" value="{{it.price}}" name="newprice">
+              <input type="submit" value="Update">
+            </form>
+          </td>
+          <td>
+            <form method="POST" action="./delete" style="display: inline">
+              <input type="hidden" value="{{it.id}}" name="id">
+              <input type="hidden" value="{{it.name}}" name="id">
+              <input type="hidden" value="{{it.price}}" name="id">
+              <input type="submit" value="Delete">
+            </form>
+
+          </td>
+
+        </tr>
+
+
+
+      {% endfor %}
+
+
+
+
+    </table>
+  {% for page in item.iter_pages() %}
+       {%if page %}
+      <a href="{{url_for('user1',page=page)}}">{{page}}</a>
+
+
+    {%else %}
+    ......
+    {%endif%}
+
+
+      {%endfor%}
+
+  </body>
+</html>
