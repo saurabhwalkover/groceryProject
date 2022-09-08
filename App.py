@@ -1,11 +1,12 @@
-from flask import Flask, render_template, redirect, url_for,flash,request
+from flask import Flask, render_template, redirect, url_for,flash,request,send_from_directory
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 from flask_marshmallow import Marshmallow
-from marshmallow import Schema,fields,ValidationError,validates,validate
+from marshmallow import fields,ValidationError,validate
 import  logging
-from flask_paginate import Pagination
+
+
 
 
 app = Flask(__name__)
@@ -43,7 +44,8 @@ class Grocery(db.Model):
     id = db.Column(db.Integer,primary_key=True , autoincrement=True)
     name = db.Column(db.String(80),nullable=False)
     price = db.Column(db.String(80),nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.userid"))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.userid"),unique=True)
+
 
 
     def __int__(self,name,price,user_id):
@@ -165,6 +167,7 @@ def logout():
 @app.route('/groceries/<int:page>')
 def user1(page):
     user_id = current_user.userid
+
     item = Grocery.query.filter_by(user_id=user_id).paginate(page=page,per_page=3,error_out=True)
     return render_template("home.html",item=item,user=user_id)
 @app.route("/add", methods=["GET", "POST"])
@@ -177,23 +180,20 @@ def grocery():
             result=GrocerySchema().load({"name":_name,"price":price})
             my_data = Grocery(name=_name, price=price,user_id=current_user.userid)
             db.session.add(my_data)
-
             db.session.commit()
             logging.info(f'grocery added successfully:{_name}')
             flash('grocery added successfully')
-            return redirect(url_for('user1'))
-        except ValidationError as error:
+            user_id = current_user.userid
+
+            count = Grocery.query.filter_by(user_id=user_id).count()
+            if (count % 3 == 0):
+               return redirect(url_for('user1', page=count // 3))
+            else:
+               return redirect(url_for('user1', page=(count // 3) + 1))
+
+        except Exception as error:
             logging.critical(error.messages)
             return (error.messages)
-
-
-
-
-
-
-
-
-
 
 
 @app.route("/update",methods=["GET","POST"])
